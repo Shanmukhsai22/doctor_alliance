@@ -13,7 +13,7 @@ function ResumeList() {
     try {
       const response = await fetch('http://localhost:5000/uploads', {
         headers: {
-          'Authorization': Bearer ${localStorage.getItem('token')}
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
 
@@ -32,9 +32,9 @@ function ResumeList() {
 
   const handleDownload = async (filename) => {
     try {
-      const response = await fetch(http://localhost:5000/download/${filename}, {
+      const response = await fetch(`http://localhost:5000/download/${filename}`, {
         headers: {
-          'Authorization': Bearer ${localStorage.getItem('token')}
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
 
