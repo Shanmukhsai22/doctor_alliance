@@ -169,5 +169,4 @@ function ResumeList() {
     </div>
   );
 }
-
 export default ResumeList;
