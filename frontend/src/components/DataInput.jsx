@@ -20,7 +20,7 @@ function DataInput() {
     formData.append('resume', file);
 
     try {
-      const response = await fetch('http://localhost:5000/upload', {
+      const response = await fetch('https://doctor-alliance.onrender.com/upload', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,

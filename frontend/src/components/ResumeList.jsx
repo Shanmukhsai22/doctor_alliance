@@ -4,14 +4,22 @@ function ResumeList() {
   const [resumes, setResumes] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const ITEMS_PER_PAGE = 7;
 
   useEffect(() => {
     fetchResumes();
   }, []);
 
+  useEffect(() => {
+    // Update total pages whenever resumes array changes
+    setTotalPages(Math.ceil(resumes.length / ITEMS_PER_PAGE));
+  }, [resumes]);
+
   const fetchResumes = async () => {
     try {
-      const response = await fetch('http://localhost:5000/uploads', {
+      const response = await fetch('https://doctor-alliance.onrender.com/uploads', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -32,7 +40,7 @@ function ResumeList() {
 
   const handleDownload = async (filename) => {
     try {
-      const response = await fetch(`http://localhost:5000/download/${filename}`, {
+      const response = await fetch(`https://doctor-alliance.onrender.com/download/${filename}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -54,6 +62,16 @@ function ResumeList() {
     } catch (err) {
       setError('Failed to download file');
     }
+  };
+
+  const getPaginatedData = () => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return resumes.slice(startIndex, endIndex);
+  };
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
   if (loading) {
@@ -96,7 +114,7 @@ function ResumeList() {
             </tr>
           </thead>
           <tbody>
-            {resumes.map((resume) => (
+            {getPaginatedData().map((resume) => (
               <tr key={resume.id}>
                 <td>{resume.name}</td>
                 <td>{resume.resume_file_name}</td>
@@ -113,6 +131,40 @@ function ResumeList() {
             ))}
           </tbody>
         </table>
+        
+        {totalPages > 1 && (
+          <div className="pagination-container mt-4 flex justify-center gap-2">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+            >
+              Previous
+            </button>
+            
+            {[...Array(totalPages)].map((_, index) => (
+              <button
+                key={index + 1}
+                onClick={() => handlePageChange(index + 1)}
+                className={`px-3 py-1 rounded ${
+                  currentPage === index + 1 
+                    ? 'bg-blue-500 text-white' 
+                    : 'bg-gray-200'
+                }`}
+              >
+                {index + 1}
+              </button>
+            ))}
+            
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
