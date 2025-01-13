@@ -1,4 +1,4 @@
-# Doctor_alliance_assignment
+# Doctor_Alliance_Assignment
 
 A full-stack web application that allows users to securely upload and manage their resumes. Built with React, Python Flask, and Supabase.
 
@@ -144,3 +144,8 @@ CREATE TABLE uploads (
 - Flask documentation
 - React documentation
 - Vite build tool
+
+## Deployed Links
+
+- **Frontend**: [https://doctor-alliance.vercel.app/](https://doctor-alliance.vercel.app/)  
+- **Backend**: [https://doctor-alliance.onrender.com/](https://doctor-alliance.onrender.com/)
