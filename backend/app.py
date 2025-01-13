@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Configuration
-app.config['SECRET_KEY'] = 'your-secret-key'  # Change this to a secure secret key
+app.config['SECRET_KEY'] = 'your-secret-key'  
 app.config['UPLOAD_FOLDER'] = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf'}
 
