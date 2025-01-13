@@ -1,0 +1,6 @@
+Flask
+Flask-Cors
+Werkzeug
+PyJWT
+supabase
+gunicorn
