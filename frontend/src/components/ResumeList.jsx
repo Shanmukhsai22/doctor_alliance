@@ -1,21 +1,50 @@
 import { useState, useEffect } from 'react';
 
 function ResumeList() {
+  // Calculate items per page based on screen height
+  const calculateItemsPerPage = () => {
+    const screenHeight = window.innerHeight;
+    const headerHeight = 60; 
+    const rowHeight = 60; 
+    const paginationHeight = 60; 
+    const padding = 40; 
+    
+    const availableHeight = screenHeight - headerHeight - paginationHeight - padding;
+    const calculatedItems = Math.floor(availableHeight / rowHeight);
+    
+    return Math.max(3, Math.min(15, calculatedItems));
+  };
+
   const [resumes, setResumes] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const ITEMS_PER_PAGE = 7;
+  const [itemsPerPage, setItemsPerPage] = useState(calculateItemsPerPage());
 
+  // Fetch resumes on component mount
   useEffect(() => {
     fetchResumes();
   }, []);
 
+  // Handle window resize to update items per page
   useEffect(() => {
-    // Update total pages whenever resumes array changes
-    setTotalPages(Math.ceil(resumes.length / ITEMS_PER_PAGE));
-  }, [resumes]);
+    const handleResize = () => {
+      setItemsPerPage(calculateItemsPerPage());
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Update total pages when resumes or itemsPerPage changes
+  useEffect(() => {
+    setTotalPages(Math.ceil(resumes.length / itemsPerPage));
+    // Reset to first page if current page is now invalid
+    if (currentPage > Math.ceil(resumes.length / itemsPerPage)) {
+      setCurrentPage(1);
+    }
+  }, [resumes, itemsPerPage]);
 
   const fetchResumes = async () => {
     try {
@@ -65,37 +94,51 @@ function ResumeList() {
   };
 
   const getPaginatedData = () => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
     return resumes.slice(startIndex, endIndex);
   };
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
+    // Scroll to top of table when page changes
+    const tableElement = document.querySelector('.table-container');
+    if (tableElement) {
+      tableElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
+  // Loading state
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="loading-text">Loading...</div>
+      <div className="page-container">
+        <div className="loading-container">
+          <div className="loading-text">Loading...</div>
+        </div>
       </div>
     );
   }
 
+  // Error state
   if (error) {
     return (
-      <div className="error-message">
-        {error}
+      <div className="page-container">
+        <div className="error-message">
+          {error}
+        </div>
       </div>
     );
   }
 
+  // Empty state
   if (resumes.length === 0) {
     return (
-      <div className="empty-state">
-        <h2 className="section-title">Uploaded Resumes</h2>
-        <div className="empty-message">
-          <p>No resumes have been uploaded yet.</p>
+      <div className="page-container">
+        <div className="empty-state">
+          <h2 className="section-title">Uploaded Resumes</h2>
+          <div className="empty-message">
+            <p>No resumes have been uploaded yet.</p>
+          </div>
         </div>
       </div>
     );
@@ -103,63 +146,84 @@ function ResumeList() {
 
   return (
     <div className="page-container">
-      <div className="table-container1">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Uploaded By</th>
-              <th>Resume</th>
-              <th>Upload Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {getPaginatedData().map((resume) => (
-              <tr key={resume.id}>
-                <td>{resume.name}</td>
-                <td>{resume.resume_file_name}</td>
-                <td>{new Date(resume.upload_date).toLocaleDateString()}</td>
-                <td>
-                  <button
-                    onClick={() => handleDownload(resume.resume_file_name)}
-                    className="download-button"
-                  >
-                    Download
-                  </button>
-                </td>
+      <h2 className="form-title">Uploaded Pdf data</h2>
+      
+      <div className="table-container">
+        <div className="table-wrapper">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Uploaded By</th>
+                <th>Resume</th>
+                <th>Upload Date</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {getPaginatedData().map((resume) => (
+                <tr key={resume.id}>
+                  <td>{resume.name}</td>
+                  <td className="filename-cell">{resume.resume_file_name}</td>
+                  <td>{new Date(resume.upload_date).toLocaleDateString()}</td>
+                  <td>
+                    <button
+                      onClick={() => handleDownload(resume.resume_file_name)}
+                      className="download-button"
+                      aria-label={`Download ${resume.resume_file_name}`}
+                    >
+                      Download
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
         
         {totalPages > 1 && (
-          <div className="pagination-container mt-4 flex justify-center gap-2">
+          <div className="pagination-container">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+              className="pagination-button"
+              aria-label="Previous page"
             >
               Previous
             </button>
             
-            {[...Array(totalPages)].map((_, index) => (
-              <button
-                key={index + 1}
-                onClick={() => handlePageChange(index + 1)}
-                className={`px-3 py-1 rounded ${
-                  currentPage === index + 1 
-                    ? 'bg-blue-500 text-white' 
-                    : 'bg-gray-200'
-                }`}
-              >
-                {index + 1}
-              </button>
-            ))}
+            {[...Array(totalPages)].map((_, index) => {
+              const pageNumber = index + 1;
+              if (
+                pageNumber === 1 ||
+                pageNumber === totalPages ||
+                Math.abs(pageNumber - currentPage) <= 1
+              ) {
+                return (
+                  <button
+                    key={pageNumber}
+                    onClick={() => handlePageChange(pageNumber)}
+                    className={`pagination-button ${
+                      currentPage === pageNumber ? 'active' : ''
+                    }`}
+                    aria-label={`Page ${pageNumber}`}
+                    aria-current={currentPage === pageNumber ? 'page' : undefined}
+                  >
+                    {pageNumber}
+                  </button>
+                );
+              } else if (
+                Math.abs(pageNumber - currentPage) === 2
+              ) {
+                return <span key={pageNumber} className="pagination-ellipsis">...</span>;
+              }
+              return null;
+            })}
             
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="px-3 py-1 rounded bg-gray-200 disabled:opacity-50"
+              className="pagination-button"
+              aria-label="Next page"
             >
               Next
             </button>
@@ -169,4 +233,5 @@ function ResumeList() {
     </div>
   );
 }
+
 export default ResumeList;
