@@ -1,4 +1,4 @@
-# Doctor_Alliance_Assignment
+# Shanmukh_alliance
 
 A full-stack web application that allows users to securely upload and manage their resumes. Built with React, Python Flask, and Supabase.
 
