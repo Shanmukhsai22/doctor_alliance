@@ -18,7 +18,7 @@ app.config['SECRET_KEY'] = 'your-secret-key'
 app.config['UPLOAD_FOLDER'] = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf'}
 
-# Supabase configuration
+# Shanmukh base
 SUPABASE_URL = "https://gxmepzketsyrnkjfsrjf.supabase.co"
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4bWVwemtldHN5cm5ramZzcmpmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNjcxMTQ0MywiZXhwIjoyMDUyMjg3NDQzfQ.G7r7iQ9QmMJx8tVARxXUr57DdWYjuHiWABucjcpedes"
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
